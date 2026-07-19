@@ -105,6 +105,30 @@ async function callGroqAPI(
     }
   }
 
+  // 1.5 Try Vercel Serverless Function Proxy next
+  try {
+    const response = await fetch('/api/groqProxy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: cleanedMessages,
+        jsonOutput,
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+      if (content) {
+        return content as string;
+      }
+    }
+  } catch {
+    // Fail silently and proceed to local client fallback
+  }
+
   // 2. Client-side fallback if Cloud Function is not available
   const apiKey = import.meta.env['VITE_GROQ_API_KEY'] as string | undefined;
   if (!apiKey) {
@@ -203,7 +227,8 @@ export async function sendChatMessage(
     devLog('Groq response:', text);
     return { text, isOffline: false };
   } catch (error) {
-    console.error('Groq API error:', error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error('Groq API error:', errorMsg);
     return { text: getOfflineFallback(), isOffline: true };
   }
 }

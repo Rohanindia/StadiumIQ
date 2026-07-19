@@ -2,7 +2,7 @@
 // This file is intentionally kept simple to allow Workbox to inject its
 // precache manifest at build time via vite-plugin-pwa or manual injection.
 
-const CACHE_NAME = 'stadiumiq-v1';
+const CACHE_NAME = 'stadiumiq-v2';
 const OFFLINE_URL = '/index.html';
 
 // Static assets to precache
