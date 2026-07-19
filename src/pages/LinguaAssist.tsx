@@ -1,7 +1,13 @@
-import React, { useState, useRef } from 'react';
+/**
+ * @fileoverview LinguaAssist — Real-time AI translation, FIFA World Cup phrase guide, and voice input.
+ * Translates text into 7 languages using Groq LLaMA. Supports Web Speech API voice input.
+ * Route: /multilingual
+ */
+import React, { useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { translateText } from '@/services/gemini';
 import { trackTranslationRequested } from '@/services/analytics';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 /** Minimal SpeechRecognition result interface for the Web Speech API. */
 interface SpeechRecognitionResult {
@@ -37,9 +43,17 @@ const PHRASES = [
 
 const LANG_NAMES: Record<string, string> = { en: 'English', es: 'Español', fr: 'Français', ar: 'العربية', pt: 'Português', zh: '中文', hi: 'हिन्दी', ja: '日本語' };
 
-/** LinguaAssist: Groq real-time translation chat, phrase guide, voice input. */
+/**
+ * LinguaAssist: Groq real-time translation chat, phrase guide, voice input.
+ *
+ * Translates user text into 7 target languages via Groq LLaMA 3.3-70B.
+ * Includes a ready-made FIFA World Cup phrase guide for common stadium
+ * scenarios (greetings, emergency, navigation) and optional Web Speech API
+ * voice input for hands-free translation.
+ */
 function LinguaAssist(): React.ReactElement {
   const { t, i18n } = useTranslation();
+  usePageTitle('LinguaAssist — Translation');
   const [message, setMessage] = useState('');
   const [targetLang, setTargetLang] = useState('es');
   const [translated, setTranslated] = useState('');
@@ -47,14 +61,14 @@ function LinguaAssist(): React.ReactElement {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
-  const handleTranslate = async (): Promise<void> => {
+  const handleTranslate = useCallback(async (): Promise<void> => {
     if (!message.trim()) return;
     setTranslating(true);
     trackTranslationRequested(LANG_NAMES[targetLang] ?? targetLang);
     const result = await translateText(message, LANG_NAMES[targetLang] ?? 'Spanish');
     setTranslated(result);
     setTranslating(false);
-  };
+  }, [message, targetLang]);
 
   const handleVoice = (): void => {
     const win = window as unknown as Record<string, unknown>;

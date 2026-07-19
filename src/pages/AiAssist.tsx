@@ -1,9 +1,16 @@
+/**
+ * @fileoverview AiAssist — Full-page GameDay AI chat powered by Groq LLaMA 3.3-70B.
+ * Maintains a persistent chat session with FIFA World Cup 2026 stadium context,
+ * suggested questions, and an offline fallback mode.
+ * Route: /ai-assist
+ */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createChatSession, sendChatMessage, buildChatMessage } from '@/services/gemini';
 import type { ChatMessage, GameDayContext } from '@/types';
 import type { ChatSession } from '@google/generative-ai';
 import { trackAiChatSent, trackAiChatResponseReceived } from '@/services/analytics';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 const SUGGESTED = [
   'Where is Gate B at MetLife Stadium?',
@@ -27,9 +34,16 @@ const CONTEXT: GameDayContext = {
   currentRoute: '/ai-assist',
 };
 
-/** Full-page GameDay AI chat with Gemini 2.0 Flash, context panel, and history. */
+/**
+ * Full-page GameDay AI chat with Groq LLaMA 3.3-70B, context panel, and message history.
+ *
+ * Initialises a Groq chat session with MetLife Stadium context on mount.
+ * Supports keyboard (Enter to send, Shift+Enter for new line) and suggested
+ * question shortcuts. Falls back to offline responses when the API is unavailable.
+ */
 function AiAssist(): React.ReactElement {
   const { t } = useTranslation();
+  usePageTitle('GameDay AI Assistant');
   const [messages, setMessages] = useState<ChatMessage[]>([
     buildChatMessage('model', t('aiAssist.welcomeMessage'), 'welcome'),
   ]);

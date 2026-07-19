@@ -1,6 +1,12 @@
+/**
+ * @fileoverview MoveIQ — Real-time shuttle ETAs, parking occupancy, rideshare links, and departure wave recommendations.
+ * Helps fans plan their post-match exit strategy with AI-informed wave timing.
+ * Route: /transport
+ */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatEta, formatPercent } from '@/utils/format';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 const SHUTTLES = [
   { id: 's1', name: 'MetLife ↔ Newark Penn Station', from: 'Newark Penn', to: 'Gate A Drop-off', eta: 8, nextDeparture: '3:45 PM', capacity: 60, occupancy: 45, running: true },
@@ -22,9 +28,16 @@ const WAVES = [
   { wave: 3 as const, desc: '30+ min (watch post-match ceremony)', exit: 'Any gate', waitMins: 30, modes: ['All options — least crowded'] },
 ];
 
-/** MoveIQ: shuttle ETAs, parking occupancy, rideshare links, departure waves. */
+/**
+ * MoveIQ: shuttle ETAs, parking occupancy, rideshare links, departure waves.
+ *
+ * Displays real-time ETAs for 4 shuttle routes, live parking lot occupancy for
+ * 4 lots, Uber/Lyft deep links, and 3-wave departure recommendations to minimise
+ * post-match congestion at MetLife Stadium.
+ */
 function MoveIQ(): React.ReactElement {
   const { t } = useTranslation();
+  usePageTitle('MoveIQ — Transport');
 
   return (
     <div>

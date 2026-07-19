@@ -1,6 +1,12 @@
+/**
+ * @fileoverview FanHub — Seat locator, gate routing, food & beverage map, and AR wayfinding.
+ * Helps fans find their seat step-by-step and discover the nearest open food stalls with live queue times.
+ * Route: /fan
+ */
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { trackSeatSearched } from '@/services/analytics';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 const SECTIONS = [
   { id: '100', gate: 'Gate A', capacity: 450, occupied: 390 },
@@ -20,9 +26,16 @@ const FOOD_STALLS = [
 
 const QUEUE_COLOR: Record<string, string> = { short: 'badge-green', medium: 'badge-amber', long: 'badge-red' };
 
-/** Fan Hub: seat locator, gate routing, food map with queue times. */
+/**
+ * Fan Hub: seat locator, gate routing, food map with queue times.
+ *
+ * Lets fans enter their section, row, and seat number to receive
+ * step-by-step gate directions. Also shows live food stall queue
+ * times and an AR wayfinding teaser.
+ */
 function FanHub(): React.ReactElement {
   const { t } = useTranslation();
+  usePageTitle('Fan Hub');
   const [section, setSection] = useState('');
   const [row, setRow] = useState('');
   const [seat, setSeat] = useState('');

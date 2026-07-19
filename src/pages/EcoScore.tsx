@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+/**
+ * @fileoverview EcoScore — Per-fan carbon footprint calculator, Groq AI eco tips, energy widget, and waste leaderboard.
+ * Emission factors sourced from DEFRA 2023 GHG Conversion Factors and Our World in Data.
+ * Route: /sustainability
+ */
+import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { computeCarbonFootprint, getCarbonLabel, getCarbonHexColor } from '@/utils/carbon';
 import { generateEcoTips } from '@/services/gemini';
 import { formatCarbon, formatPercent } from '@/utils/format';
 import type { CarbonInputs } from '@/types';
 import { trackCarbonCalculated } from '@/services/analytics';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 const LEADERBOARD = [
   { section: 'Section 100', recycled: 42, composted: 18, landfill: 8, rate: 0.88 },
@@ -15,16 +21,23 @@ const LEADERBOARD = [
 
 const SORTED_LB = [...LEADERBOARD].sort((a, b) => b.rate - a.rate);
 
-/** EcoScore: carbon footprint calculator, AI eco tips, energy widget, waste leaderboard. */
+/**
+ * EcoScore: per-fan carbon footprint calculator, Groq AI eco tips, energy widget, waste leaderboard.
+ *
+ * Users input their travel mode, distance, meal type, and number of meals to get
+ * a personalised carbon footprint score plus 3 Groq-generated eco improvement tips.
+ * Stadium energy usage and a per-section waste diversion leaderboard are always visible.
+ */
 function EcoScore(): React.ReactElement {
   const { t } = useTranslation();
+  usePageTitle('EcoScore — Sustainability');
   const [inputs, setInputs] = useState<CarbonInputs>({ transportMode: 'car', distanceKm: 30, mealType: 'meat', numberOfMeals: 2 });
   const [result, setResult] = useState<ReturnType<typeof computeCarbonFootprint> | null>(null);
   const [tips, setTips] = useState<string[]>([]);
   const [loadingTips, setLoadingTips] = useState(false);
   const [calculated, setCalculated] = useState(false);
 
-  const handleCalculate = async (): Promise<void> => {
+  const handleCalculate = useCallback(async (): Promise<void> => {
     const footprint = computeCarbonFootprint(inputs);
     setResult(footprint);
     setCalculated(true);
@@ -33,7 +46,7 @@ function EcoScore(): React.ReactElement {
     const ecoTips = await generateEcoTips(inputs.transportMode, inputs.mealType, footprint.totalKgCO2);
     setTips(ecoTips);
     setLoadingTips(false);
-  };
+  }, [inputs]);
 
   return (
     <div>

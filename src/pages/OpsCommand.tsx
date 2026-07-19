@@ -2,13 +2,15 @@
  * @fileoverview OpsCommand — Staff operational intelligence dashboard.
  * Tabs: Active Incidents, Resource Allocation, Real-time Communications.
  * Includes Groq-powered AI recommendation card for operational decision support.
+ * Route: /ops (staff-only)
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { sanitizeAndTruncate } from '@/utils/sanitize';
 import { trackIncidentLogged, trackCommsMessageSent } from '@/services/analytics';
 import { useAuth } from '@/contexts/useAuth';
 import { generateCompletion } from '@/services/gemini';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 // ── Static data ─────────────────────────────────────────────────────────────
 
@@ -80,8 +82,12 @@ const INITIAL_COMMS: CommsEntry[] = [
 
 // ── Sub-components ───────────────────────────────────────────────────────────
 
-/** Renders a single active incident card */
-function IncidentCard({ inc }: { inc: Incident }): React.ReactElement {
+/**
+ * Renders a single active incident card with severity badge, status badge, description, and location.
+ *
+ * @param inc - The incident data to display
+ */
+const IncidentCard = memo(function IncidentCard({ inc }: { inc: Incident }): React.ReactElement {
   return (
     <div className="card" style={{ borderLeft: `3px solid ${SEVERITY_COLOR[inc.severity] ?? '#3b82f6'}` }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
@@ -98,10 +104,14 @@ function IncidentCard({ inc }: { inc: Incident }): React.ReactElement {
       </div>
     </div>
   );
-}
+});
 
-/** Renders a single resource allocation card with progress bar */
-function ResourceCard({ resource }: { resource: Resource }): React.ReactElement {
+/**
+ * Renders a single resource allocation card with a progress bar indicating staffing level.
+ *
+ * @param resource - The resource allocation data to display
+ */
+const ResourceCard = memo(function ResourceCard({ resource }: { resource: Resource }): React.ReactElement {
   const ratio = resource.assigned / resource.needed;
   return (
     <div className="card">
@@ -122,7 +132,7 @@ function ResourceCard({ resource }: { resource: Resource }): React.ReactElement 
       </div>
     </div>
   );
-}
+});
 
 // ── AI Recommendation Card ───────────────────────────────────────────────────
 
@@ -208,15 +218,34 @@ Example format: "Redeploy 4 crowd-control officers from Gate B to Gate A — cur
 
 // ── Main Component ───────────────────────────────────────────────────────────
 
-/** OpsCommand: Staff incident management, resource allocation, comms board, and AI decision support. */
+/**
+ * OpsCommand: Staff incident management, resource allocation,
+ * real-time communications board, and Groq-powered AI decision support.
+ *
+ * Protected route — requires staff or admin role via Firebase Auth.
+ * All user inputs are sanitized via DOMPurify before logging or sending.
+ */
 function OpsCommand(): React.ReactElement {
   const { t } = useTranslation();
-  useAuth();
+  useAuth(); // Ensures Auth context is available; auth gate is enforced at the route level
+  usePageTitle('OpsCommand — Staff Dashboard');
   const [tab, setTab] = useState<'incidents' | 'resources' | 'comms'>('incidents');
   const [newIncident, setNewIncident] = useState({ type: 'medical', location: '', desc: '', severity: 'medium' });
   const [submitted, setSubmitted] = useState(false);
   const [message, setMessage] = useState('');
   const [commsLog, setCommsLog] = useState<CommsEntry[]>(INITIAL_COMMS);
+
+  /** Active (non-resolved) incidents derived from static data */
+  const activeIncidents = useMemo(
+    () => INCIDENTS.filter((i) => i.status !== 'resolved'),
+    []
+  );
+
+  /** Understaffed resource zones derived from static data */
+  const understaffedZones = useMemo(
+    () => RESOURCES.filter((r) => r.assigned < r.needed),
+    []
+  );
 
   const handleSubmitIncident = (e: React.FormEvent): void => {
     e.preventDefault();
@@ -285,7 +314,7 @@ function OpsCommand(): React.ReactElement {
           <section aria-labelledby="incidents-heading">
             <div className="section-label" id="incidents-heading">Active Incidents</div>
             <div style={{ display: 'grid', gap: 10 }}>
-              {INCIDENTS.filter((i) => i.status !== 'resolved').map((inc) => (
+              {activeIncidents.map((inc) => (
                 <IncidentCard key={inc.id} inc={inc} />
               ))}
             </div>
@@ -376,6 +405,11 @@ function OpsCommand(): React.ReactElement {
       {tab === 'resources' && (
         <section aria-labelledby="resources-heading">
           <div className="section-label" id="resources-heading">Resource Allocation by Zone</div>
+          {understaffedZones.length > 0 && (
+            <div className="alert-banner alert-amber" style={{ marginBottom: 12 }} role="status">
+              ⚠️ Alert: {understaffedZones.length} zones are currently understaffed.
+            </div>
+          )}
           <div style={{ display: 'grid', gap: 12 }}>
             {RESOURCES.map((r) => (
               <ResourceCard key={r.zone} resource={r} />

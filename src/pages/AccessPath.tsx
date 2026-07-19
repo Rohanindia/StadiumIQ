@@ -1,7 +1,13 @@
+/**
+ * @fileoverview AccessPath — Wheelchair routes, sensory zones, elevator status, and one-tap assistance requests.
+ * WCAG 2.1 AA compliant. All form inputs sanitized via DOMPurify before processing.
+ * Route: /accessibility
+ */
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { sanitizeAndTruncate } from '@/utils/sanitize';
 import { trackAssistanceRequested } from '@/services/analytics';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 const ROUTES = [
   { id: 'r1', from: 'Gate A', to: 'Section 100 (Wheelchair)', steps: ['Enter Gate A — accessible entrance on the right', 'Take the dedicated elevator to Level 1', 'Follow blue accessibility signs to Section 100'], mins: 6, elevator: true, status: 'operational' as const },
@@ -27,9 +33,16 @@ const ELEVATOR_BADGE: Record<string, string> = {
   'out-of-order': 'badge-red',
 };
 
-/** AccessPath: wheelchair routes, sensory zones, elevator status, assistance requests. */
+/**
+ * AccessPath: wheelchair routes, sensory zones, elevator status, and assistance requests.
+ *
+ * Provides step-by-step accessible navigation for 3 wheelchair routes,
+ * sensory zone locations, real-time elevator status, and a one-tap assistance
+ * request form for fans with mobility, visual, hearing, or medical needs.
+ */
 function AccessPath(): React.ReactElement {
   const { t } = useTranslation();
+  usePageTitle('AccessPath — Accessibility');
   const [location, setLocation] = useState('');
   const [needType, setNeedType] = useState('mobility');
   const [notes, setNotes] = useState('');

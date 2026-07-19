@@ -1,13 +1,15 @@
 /**
  * @fileoverview CrowdIQ — Live density heatmap, AI choke-point analysis, and PA announcement generator.
  * Provides real-time crowd management with Groq-powered recommendations.
+ * Route: /crowd
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePAAnnouncement, generateCompletion } from '@/services/gemini';
 import type { AlertLevel } from '@/types';
 import { formatPercent } from '@/utils/format';
 import { trackPAGenerated } from '@/services/analytics';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 // ── Static data ─────────────────────────────────────────────────────────────
 
@@ -43,8 +45,12 @@ const ALERT_CONFIG: Record<AlertLevel, AlertConfig> = {
 
 // ── Sub-components ───────────────────────────────────────────────────────────
 
-/** Renders a single zone density card */
-function ZoneCard({ zone }: { zone: Zone }): React.ReactElement {
+/**
+ * Renders a single zone density card with an occupancy bar and alert badge.
+ *
+ * @param zone - The crowd zone data to display
+ */
+const ZoneCard = memo(function ZoneCard({ zone }: { zone: Zone }): React.ReactElement {
   const cfg = ALERT_CONFIG[zone.alert];
   const density = zone.current / zone.capacity;
   return (
@@ -66,7 +72,7 @@ function ZoneCard({ zone }: { zone: Zone }): React.ReactElement {
       </div>
     </div>
   );
-}
+});
 
 // ── AI Crowd Recommendation Card ─────────────────────────────────────────────
 
@@ -218,12 +224,19 @@ function PaGenerator({ zones }: PaGeneratorProps): React.ReactElement {
 
 // ── Main Component ───────────────────────────────────────────────────────────
 
-/** CrowdIQ: live density heatmap, AI choke-point predictions, rerouting recommendations, and PA generator. */
+/**
+ * CrowdIQ page — live density heatmap, AI choke-point predictions,
+ * rerouting recommendations, and Groq-powered PA announcement generator.
+ *
+ * Displays real-time crowd density across 6 stadium zones and surfaces
+ * AI-generated crowd management actions for operational staff.
+ */
 function CrowdIQ(): React.ReactElement {
   const { t } = useTranslation();
+  usePageTitle('CrowdIQ — Crowd Management');
 
-  const redZones = ZONES.filter((z) => z.alert === 'red');
-  const amberZones = ZONES.filter((z) => z.alert === 'amber');
+  const redZones = useMemo(() => ZONES.filter((z) => z.alert === 'red'), []);
+  const amberZones = useMemo(() => ZONES.filter((z) => z.alert === 'amber'), []);
 
   return (
     <div>

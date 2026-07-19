@@ -1,6 +1,13 @@
+/**
+ * @fileoverview Home page — Smart Stadium Operations Dashboard.
+ * Renders the live FIFA World Cup 2026 command-center view with zone monitor,
+ * simulated camera feeds, alert terminal, and quick-links to all modules.
+ * Route: /
+ */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 interface AlertItem {
   time: string;
@@ -24,8 +31,16 @@ const MODULE_LINKS = [
   { to: '/ai-assist', emoji: '🤖', key: 'aiAssist', color: '#a78bfa', desc: 'Gemini-powered GameDay tournament assistant' },
 ];
 
+/**
+ * Home page: Smart Stadium Operations Dashboard.
+ *
+ * Displays live zone telemetry, a simulated camera feed, a scrolling alert
+ * terminal, and quick-links to all StadiumIQ operational modules.
+ * A match timer simulation ticks in real-time to illustrate live data ingestion.
+ */
 function Home(): React.ReactElement {
   const { t } = useTranslation();
+  usePageTitle('Smart Stadium Dashboard');
 
   // Dashboard state
   const [alerts, setAlerts] = useState<AlertItem[]>(INITIAL_ALERTS);
