@@ -16,6 +16,9 @@ vi.mock('@/services/gemini', () => ({
   generatePAAnnouncement: vi.fn().mockResolvedValue(
     'Attention: Please use Gate C for alternate entry.'
   ),
+  generateCompletion: vi.fn().mockResolvedValue(
+    'Recommend rerouting Gate A traffic to Gate C — density at 91%.'
+  ),
 }));
 
 function renderCrowdIQ() {
@@ -78,5 +81,19 @@ describe('CrowdIQ', () => {
   it('renders choke-point predictions for non-green zones', () => {
     renderCrowdIQ();
     expect(screen.getByText(/Choke Points/i)).toBeInTheDocument();
+  });
+
+  it('renders the AI crowd rerouting recommendation button', () => {
+    renderCrowdIQ();
+    expect(screen.getByRole('button', { name: /Generate AI crowd rerouting recommendation/i })).toBeInTheDocument();
+  });
+
+  it('shows AI recommendation after clicking rerouting button', async () => {
+    renderCrowdIQ();
+    const btn = screen.getByRole('button', { name: /Generate AI crowd rerouting recommendation/i });
+    fireEvent.click(btn);
+    await waitFor(() => {
+      expect(screen.getByText(/AI Crowd Management Recommendation/i)).toBeInTheDocument();
+    });
   });
 });

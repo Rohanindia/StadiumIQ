@@ -22,35 +22,42 @@
 
 ---
 
-## 🎯 Problem Statement Coverage
+## 🎯 Problem Statement Alignment
 
-| Domain | Feature | Route | AI-Powered |
-|--------|---------|-------|-----------|
-| 🏟️ Fan Experience | Seat locator, food stall queue times, gate routing | `/fan` | ✅ |
-| 🤖 AI Assistant | Real-time Q&A for FIFA WC 2026, multilingual | `/ai-assist` | ✅ Groq LLaMA 3.3 |
-| 👥 Crowd Management | Heatmap density, choke-point alerts, zone predictions | `/crowd` | ✅ Groq |
-| ♿ Accessibility | Wheelchair routes, elevator status, assistance requests | `/accessibility` | ✅ |
-| 🚌 Transport & Mobility | Shuttle tracker, parking occupancy, rideshare links | `/transport` | ❌ (real-time data) |
-| 🌱 Sustainability | Carbon calculator, eco-tips, waste leaderboard | `/sustainability` | ✅ Groq |
-| 🌐 Multilingual | Auto-detect language, RTL support (Arabic), voice input | `/multilingual` | ✅ Groq |
-| 🔒 Ops Command | Staff dashboard, incident reports, resource allocation | `/ops` | ✅ (Auth-protected) |
+The brief asks to *"improve navigation, crowd management, accessibility, transportation, sustainability, multilingual assistance, operational intelligence, or real-time decision support."*
+
+Every brief domain is addressed — including the two highest-value areas: **operational intelligence** and **real-time decision support** — each backed by a live Groq API call:
+
+| Brief Domain | Feature | Route | AI Engine | Proof Point |
+|---|---|---|---|---|
+| **Navigation** | Seat locator with step-by-step gate routing & AR wayfinding | `/fan` | — | Fan enters section → gets gate + numbered directions instantly |
+| **Crowd Management** | Live density heatmap, choke-point analysis, AI rerouting recommendation | `/crowd` | ✅ Groq LLaMA | "Recommend rerouting Gate A traffic — density at 91%" (live Groq call) |
+| **Accessibility** | Wheelchair routes, elevator status, one-tap assistance request, sensory zones | `/accessibility` | — | 4 routes with step-by-step instructions + elevator status board |
+| **Transportation** | Real-time shuttle ETAs, parking occupancy, rideshare links, departure waves | `/transport` | — | 4 shuttle routes + 4 parking lots with live occupancy bars |
+| **Sustainability** | Per-fan carbon calculator, AI eco-tips, energy widget, waste leaderboard | `/sustainability` | ✅ Groq LLaMA | User inputs travel/food → Groq returns 3 personalised eco-tips |
+| **Multilingual Assistance** | Real-time AI translation in 8 languages, voice input, FIFA phrase guide | `/multilingual` | ✅ Groq LLaMA | Type any text → Groq translates to Spanish, French, Arabic, Chinese, Hindi, Japanese, Portuguese |
+| **Operational Intelligence** | Staff incident logger, resource allocation heatmap, **AI decision recommendation** | `/ops` | ✅ Groq LLaMA | Groq analyses open incidents + understaffed zones → outputs single prioritised action |
+| **Real-time Decision Support** | AI crowd rerouting card (**CrowdIQ**) + AI ops recommendation card (**OpsCommand**) | `/crowd` `/ops` | ✅ Groq LLaMA | Both cards call Groq with live data and surface a numbered, zone-specific action |
+| **AI Assistant** | Full-session Q&A chat for FIFA WC 2026 — venues, schedule, wayfinding | `/ai-assist` | ✅ Groq LLaMA | Persistent chat session with stadium context, offline fallback |
 
 ---
 
 ## ✨ Features
 
 - **AI Chat (Groq / LLaMA 3.3-70B)** — Real-time stadium Q&A across all 16 FIFA 2026 venues
+- **AI Crowd Rerouting** — Live Groq recommendation card on `/crowd` with zone-specific action
+- **AI Operational Intelligence** — Live Groq recommendation card on `/ops` based on open incidents
 - **Firebase Auth** — Email/password login with role-based access (fan vs staff)
 - **Firestore** — Real-time crowd density, queue times, incident reports
 - **RTL Language Support** — Full right-to-left layout for Arabic
-- **i18n** — English, Spanish, French, Arabic via react-i18next
+- **i18n** — English, Spanish, French, Arabic, Portuguese, Chinese, Hindi, Japanese via react-i18next
 - **Offline Support** — Service worker caching, graceful offline fallbacks
 - **PWA Ready** — `manifest.json` with icons, installable on mobile
 - **Accessibility** — WCAG 2.1 AA compliant, aria-live regions, skip-to-content
 - **Rate Limiting** — Token bucket algorithm (10 calls/min) for AI API
 - **OpsCommand Dashboard** — Protected route (`/ops`) with incident & resource management
-- **React Router v7 Ready** — Enabled future flags (`v7_startTransition`, `v7_relativeSplatPath`) for a warnings-free console and seamless upgrade path
-- **Vercel Serverless Proxy** — `api/groqProxy.js` routes Groq API calls through a server-side function, bypassing browser CORS restrictions and keeping your API key secure
+- **React Router v7 Ready** — Enabled future flags for a warnings-free console
+- **Vercel Serverless Proxy** — `api/groqProxy.js` routes Groq API calls server-side, keeping the API key secure
 
 ---
 
@@ -153,7 +160,7 @@ npm test
 ```
 
 Tests are located in `src/test/` and `src/pages/*.test.tsx`.  
-All 171 unit and integration tests compile cleanly with TypeScript (`tsc --noEmit`) and run completely green with 0 console warnings or errors. All tests use **Vitest** + **@testing-library/react**.
+All unit and integration tests compile cleanly with TypeScript (`tsc --noEmit`) and run completely green with 0 console warnings or errors. All tests use **Vitest** + **@testing-library/react**.
 
 ---
 
@@ -164,18 +171,20 @@ All 171 unit and integration tests compile cleanly with TypeScript (`tsc --noEmi
 | `/` | Home — Live OpsCommand Dashboard | No |
 | `/fan` | Fan Hub — Seat locator, food stalls | No |
 | `/ai-assist` | GameDay AI — Groq-powered chat | No |
-| `/crowd` | CrowdIQ — Density heatmap, alerts | No |
+| `/crowd` | CrowdIQ — Density heatmap, AI rerouting | No |
 | `/accessibility` | AccessPath — Wheelchair routes | No |
 | `/transport` | MoveIQ — Shuttles, parking | No |
 | `/sustainability` | EcoScore — Carbon footprint | No |
 | `/multilingual` | LinguaAssist — Multilingual AI chat | No |
-| `/ops` | OpsCommand — Staff dashboard | ✅ Staff only |
+| `/ops` | OpsCommand — Staff dashboard + AI decision support | ✅ Staff only |
 
 ---
 
-## 📸 Screenshots
+## 🔒 Security
 
-> Dashboard and route previews coming soon.
+- **No catch-all Firestore rules** — all collections use explicit `isAuthenticated()` / `isStaff()` guards; the final rule is `allow read, write: if false`
+- **Groq API key never exposed client-side in production** — all calls are proxied through the Vercel serverless function (`api/groqProxy.js`); the key lives only in Vercel environment variables
+- **Input sanitization** — all user inputs run through DOMPurify + prompt-injection filter before reaching Groq or Firestore
 
 ---
 

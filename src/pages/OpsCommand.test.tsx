@@ -14,6 +14,12 @@ vi.mock('@/services/analytics', () => ({
   trackCommsMessageSent: vi.fn(),
 }));
 
+vi.mock('@/services/gemini', () => ({
+  generateCompletion: vi.fn().mockResolvedValue(
+    'Redeploy 4 officers from Gate B to Gate A — critical density requires immediate intervention.'
+  ),
+}));
+
 function renderOpsCommand() {
   return render(
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -109,5 +115,15 @@ describe('OpsCommand', () => {
     renderOpsCommand();
     fireEvent.click(screen.getByRole('button', { name: /comms tab/i }));
     expect(screen.getByRole('button', { name: /Send message/i })).toBeDisabled();
+  });
+
+  it('renders the AI operational intelligence recommendation section', () => {
+    renderOpsCommand();
+    expect(screen.getByText(/AI Operational Intelligence/i)).toBeInTheDocument();
+  });
+
+  it('renders the Get AI Recommendation button', () => {
+    renderOpsCommand();
+    expect(screen.getByRole('button', { name: /Generate AI operational recommendation/i })).toBeInTheDocument();
   });
 });

@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+/**
+ * @fileoverview Firebase Auth context provider for StadiumIQ.
+ * Exports only the AuthProvider component and related types.
+ * The useAuth() hook lives in ./useAuth.ts (react-refresh requires one export per file).
+ */
+
+import React, { createContext, useEffect, useState } from 'react';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -9,7 +15,8 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/services/firebase';
 import type { UserProfile, UserRole } from '@/types';
 
-interface AuthContextValue {
+/** Shape of the authentication context value. */
+export interface AuthContextValue {
   user: User | null;
   profile: UserProfile | null;
   role: UserRole;
@@ -19,11 +26,16 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+/** React context holding the current auth state. Consumed via useAuth(). */
+// eslint-disable-next-line react-refresh/only-export-components
+export const AuthContext = createContext<AuthContextValue | null>(null);
 
 /**
  * Provides Firebase Auth state to the entire application.
  * Also fetches the user's Firestore profile to determine their role.
+ *
+ * @param children - React children wrapped by this provider
+ * @returns Provider element with auth state
  */
 export function AuthProvider({ children }: { children: React.ReactNode }): React.ReactElement {
   const [user, setUser] = useState<User | null>(null);
@@ -67,20 +79,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }): React
       {children}
     </AuthContext.Provider>
   );
-}
-
-/**
- * Hook to access authentication state and actions.
- * Must be used inside <AuthProvider>.
- *
- * @returns AuthContextValue with user, profile, role, signIn, signOut
- * @throws If used outside of AuthProvider
- *
- * @example
- * const { user, role, signOut } = useAuth();
- */
-export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
-  return ctx;
 }

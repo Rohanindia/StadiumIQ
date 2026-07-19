@@ -3,6 +3,23 @@ import { useTranslation } from 'react-i18next';
 import { translateText } from '@/services/gemini';
 import { trackTranslationRequested } from '@/services/analytics';
 
+/** Minimal SpeechRecognition result interface for the Web Speech API. */
+interface SpeechRecognitionResult {
+  readonly results: { [index: number]: { [index: number]: { transcript: string } | undefined } | undefined };
+}
+
+/** Minimal SpeechRecognition instance interface for the Web Speech API. */
+interface SpeechRecognitionInstance {
+  lang: string;
+  onresult: ((event: SpeechRecognitionResult) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+
+/** SpeechRecognition constructor type from the Web Speech API. */
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
+
 const PHRASES = [
   { category: 'Greetings', items: [
     { en: 'Hello! Welcome to the World Cup!', es: '¡Hola! ¡Bienvenido al Mundial!', fr: 'Bonjour! Bienvenue à la Coupe du Monde!', ar: 'مرحباً! مرحباً بكم في كأس العالم!', pt: 'Olá! Bem-vindo à Copa do Mundo!', zh: '你好！欢迎来到世界杯！' },
@@ -20,7 +37,7 @@ const PHRASES = [
 
 const LANG_NAMES: Record<string, string> = { en: 'English', es: 'Español', fr: 'Français', ar: 'العربية', pt: 'Português', zh: '中文', hi: 'हिन्दी', ja: '日本語' };
 
-/** LinguaAssist: Gemini real-time translation chat, phrase guide, voice input. */
+/** LinguaAssist: Groq real-time translation chat, phrase guide, voice input. */
 function LinguaAssist(): React.ReactElement {
   const { t, i18n } = useTranslation();
   const [message, setMessage] = useState('');
@@ -28,7 +45,7 @@ function LinguaAssist(): React.ReactElement {
   const [translated, setTranslated] = useState('');
   const [translating, setTranslating] = useState(false);
   const [listening, setListening] = useState(false);
-  const recognitionRef = useRef<any | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   const handleTranslate = async (): Promise<void> => {
     if (!message.trim()) return;
@@ -40,12 +57,13 @@ function LinguaAssist(): React.ReactElement {
   };
 
   const handleVoice = (): void => {
-    const SpeechRecognitionAPI = (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition;
+    const win = window as unknown as Record<string, unknown>;
+    const SpeechRecognitionAPI = (win['SpeechRecognition'] ?? win['webkitSpeechRecognition']) as SpeechRecognitionConstructor | undefined;
     if (!SpeechRecognitionAPI) { alert('Voice input not supported in this browser.'); return; }
     if (listening) { recognitionRef.current?.stop(); setListening(false); return; }
     const rec = new SpeechRecognitionAPI();
     rec.lang = i18n.language;
-    rec.onresult = (e: any) => { setMessage(e.results[0]?.[0]?.transcript ?? ''); };
+    rec.onresult = (e: SpeechRecognitionResult) => { setMessage(e.results[0]?.[0]?.transcript ?? ''); };
     rec.onend = () => setListening(false);
     rec.start();
     recognitionRef.current = rec;
