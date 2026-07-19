@@ -5,13 +5,17 @@
 ![StadiumIQ Banner](https://img.shields.io/badge/FIFA%20WC%202026-StadiumIQ-00c896?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0tMiAxNWwtNS01IDEuNDEtMS40MUwxMCAxNC4xN2w3LjU5LTcuNTlMMTkgOGwtOSA5eiIvPjwvc3ZnPg==)
 ![React](https://img.shields.io/badge/React-19.x-61DAFB?style=flat-square&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript)
-![Firebase](https://img.shields.io/badge/Firebase-10.x-FFCA28?style=flat-square&logo=firebase)
+![Firebase](https://img.shields.io/badge/Firebase-12.x-FFCA28?style=flat-square&logo=firebase)
 ![Groq AI](https://img.shields.io/badge/Groq-LLaMA%203.3%2070B-F55036?style=flat-square)
 ![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=flat-square&logo=vite)
+![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel)
 
 ---
 
 ## 🚀 Live Demo
+
+> 🔗 **[https://stadium-iq.sigma.vercel.app](https://stadium-iq.sigma.vercel.app)** ← **Primary (Vercel — AI fully active)**  
+> Vercel Hosting with Serverless Groq API Proxy
 
 > 🔗 **[https://stadiumiq-4e4a1.web.app](https://stadiumiq-4e4a1.web.app)**  
 > Firebase Hosting — Project: `stadiumiq-4e4a1`
@@ -46,6 +50,7 @@
 - **Rate Limiting** — Token bucket algorithm (10 calls/min) for AI API
 - **OpsCommand Dashboard** — Protected route (`/ops`) with incident & resource management
 - **React Router v7 Ready** — Enabled future flags (`v7_startTransition`, `v7_relativeSplatPath`) for a warnings-free console and seamless upgrade path
+- **Vercel Serverless Proxy** — `api/groqProxy.js` routes Groq API calls through a server-side function, bypassing browser CORS restrictions and keeping your API key secure
 
 ---
 
@@ -56,10 +61,11 @@
 | Framework | React 19 + TypeScript |
 | Build Tool | Vite 5 |
 | Routing | React Router v6 (with v7 Future Flags) |
-| AI | Groq API (LLaMA 3.3-70B Versatile) |
+| AI | Groq API (LLaMA 3.3-70B Versatile) via Vercel Serverless Proxy |
 | Database | Firebase Firestore |
 | Auth | Firebase Authentication |
-| Hosting | Firebase Hosting |
+| Hosting | Vercel (primary) + Firebase Hosting |
+| Serverless | Vercel Functions (`api/groqProxy.js`) |
 | i18n | i18next + react-i18next |
 | Testing | Vitest + Testing Library |
 | Styling | Vanilla CSS (glassmorphism, cyberpunk theme) |
