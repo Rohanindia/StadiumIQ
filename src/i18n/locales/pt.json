@@ -1,0 +1,62 @@
+{
+  "nav": {
+    "fan": "Hub de Fãs",
+    "crowd": "CrowdIQ",
+    "accessibility": "AccessPath",
+    "transport": "MoveIQ",
+    "sustainability": "EcoScore",
+    "multilingual": "LinguaAssist",
+    "ops": "OpsCommand",
+    "aiAssist": "IA do Jogo",
+    "home": "Início"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Algo deu errado",
+    "retry": "Tentar novamente",
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "save": "Salvar",
+    "search": "Buscar",
+    "language": "Idioma",
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "staffOnly": "Apenas Equipe",
+    "offline": "Você está offline",
+    "offlineMessage": "Alguns recursos podem estar limitados sem conexão."
+  },
+  "home": {
+    "title": "StadiumIQ",
+    "subtitle": "Copa do Mundo FIFA 2026",
+    "tagline": "Seu guia com IA para o maior espetáculo da Terra",
+    "exploreFeatures": "Explorar Recursos",
+    "quickAccess": "Acesso Rápido"
+  },
+  "aiAssist": {
+    "title": "IA do Jogo",
+    "subtitle": "Seu assistente de IA para a Copa do Mundo FIFA 2026",
+    "placeholder": "Pergunte-me qualquer coisa sobre a Copa...",
+    "send": "Enviar",
+    "thinking": "Pensando...",
+    "offline": "Offline — usando respostas prontas",
+    "contextPanel": "Contexto Atual",
+    "noMatch": "Nenhuma partida agendada no momento",
+    "rateLimited": "Aguarde um momento antes de enviar outra mensagem.",
+    "welcomeMessage": "Olá! Sou a IA do Jogo, seu assistente da Copa do Mundo FIFA 2026. Posso ajudar com navegação, transporte, acessibilidade e sustentabilidade. Como posso ajudar você hoje?",
+    "suggestedQuestions": [
+      "Onde fica a praça de alimentação mais próxima?",
+      "Como chego ao meu assento?",
+      "Qual é o horário dos traslados?",
+      "Fale-me sobre as seleções da Copa"
+    ]
+  },
+  "errors": {
+    "notFound": "Página não encontrada",
+    "notFoundMessage": "A página que você procura não existe.",
+    "goHome": "Ir para o Início",
+    "genericError": "Ocorreu um erro",
+    "tryAgain": "Tente novamente",
+    "networkError": "Erro de rede — verifique sua conexão"
+  }
+}

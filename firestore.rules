@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ────────────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isStaff() {
+      return isAuthenticated() &&
+        request.auth.token.role == 'staff';
+    }
+
+    function isValidString(field, maxLen) {
+      return field is string && field.size() <= maxLen;
+    }
+
+    // ── User documents ──────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId)
+        && isValidString(request.resource.data.displayName, 100);
+
+      // User preferences sub-collection
+      match /preferences/{prefId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Carbon footprint logs
+      match /carbonLogs/{logId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Assistance requests
+      match /assistanceRequests/{reqId} {
+        allow create: if isOwner(userId);
+        allow read: if isOwner(userId) || isStaff();
+        allow update, delete: if isStaff();
+      }
+    }
+
+    // ── Crowd density data (read by all authenticated, write by staff) ──────
+    match /crowdData/{zoneId} {
+      allow read: if isAuthenticated();
+      allow write: if isStaff();
+    }
+
+    // ── Transport / shuttle data (read by all authenticated) ────────────────
+    match /transportData/{routeId} {
+      allow read: if isAuthenticated();
+      allow write: if isStaff();
+    }
+
+    // ── OpsCommand resources (staff only) ───────────────────────────────────
+    match /incidents/{incidentId} {
+      allow read, write: if isStaff();
+    }
+
+    match /resources/{resourceId} {
+      allow read, write: if isStaff();
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if isAuthenticated();
+      allow write: if isStaff();
+    }
+
+    match /shifts/{shiftId} {
+      allow read: if isStaff();
+      allow write: if isStaff();
+    }
+
+    // ── Queue lengths (read by all, write by staff) ─────────────────────────
+    match /queueData/{stallId} {
+      allow read: if isAuthenticated();
+      allow write: if isStaff();
+    }
+
+    // ── Sustainability / waste leaderboard (read by all) ────────────────────
+    match /wasteLeaderboard/{sectionId} {
+      allow read: if isAuthenticated();
+      allow write: if isStaff();
+    }
+
+    // ── Default: deny everything not explicitly allowed ─────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

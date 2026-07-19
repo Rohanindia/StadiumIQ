@@ -1,0 +1,62 @@
+{
+  "nav": {
+    "fan": "球迷中心",
+    "crowd": "人流控制",
+    "accessibility": "无障碍通道",
+    "transport": "交通指南",
+    "sustainability": "绿色环保",
+    "multilingual": "智能翻译",
+    "ops": "运营指令",
+    "aiAssist": "赛事智能助手",
+    "home": "首页"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "出错了",
+    "retry": "重试",
+    "submit": "提交",
+    "cancel": "取消",
+    "close": "关闭",
+    "save": "保存",
+    "search": "搜索",
+    "language": "语言",
+    "signIn": "登录",
+    "signOut": "登出",
+    "staffOnly": "限工作人员",
+    "offline": "您已离线",
+    "offlineMessage": "在没有互联网连接的情况下，某些功能可能会受到限制。"
+  },
+  "home": {
+    "title": "StadiumIQ",
+    "subtitle": "2026年FIFA世界杯",
+    "tagline": "您的AI智能体育场向导，带您领略全球最伟大的足球盛宴",
+    "exploreFeatures": "探索功能",
+    "quickAccess": "快速访问"
+  },
+  "aiAssist": {
+    "title": "赛事智能助手",
+    "subtitle": "您的2026年FIFA世界杯AI助理",
+    "placeholder": "问我关于世界杯的任何问题...",
+    "send": "发送",
+    "thinking": "思考中...",
+    "offline": "离线状态 - 使用本地备用回答",
+    "contextPanel": "当前信息",
+    "noMatch": "当前无赛事计划",
+    "rateLimited": "请稍等片刻再发送消息。",
+    "welcomeMessage": "您好！我是赛事智能助手。我可以帮助您寻找座位、获取交通和无障碍通道信息、并提供环保建议。今天有什么我可以帮您的？",
+    "suggestedQuestions": [
+      "最近的餐饮区在哪里？",
+      "如何找到我的座位？",
+      "接驳车的发车时间是什么？",
+      "向我介绍一下世界杯参赛队伍"
+    ]
+  },
+  "errors": {
+    "notFound": "页面未找到",
+    "notFoundMessage": "您访问的页面不存在。",
+    "goHome": "返回首页",
+    "genericError": "发生错误",
+    "tryAgain": "请重试",
+    "networkError": "网络错误 - 请检查您的连接"
+  }
+}

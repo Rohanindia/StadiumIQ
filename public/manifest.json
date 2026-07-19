@@ -1,0 +1,41 @@
+{
+  "name": "StadiumIQ",
+  "short_name": "StadiumIQ",
+  "description": "GenAI-powered Smart Stadium & Tournament Operations for FIFA World Cup 2026",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0F1E",
+  "theme_color": "#1D9E75",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "categories": ["sports", "navigation", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "GameDay AI",
+      "short_name": "AI Chat",
+      "url": "/ai-assist",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Fan Hub",
+      "short_name": "Fan Hub",
+      "url": "/fan",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}
