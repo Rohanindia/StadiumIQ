@@ -7,7 +7,7 @@ import App from '../App';
 
 test('renders App with all providers', () => {
   render(
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <I18nextProvider i18n={i18n}>
         <AuthProvider>
           <App />

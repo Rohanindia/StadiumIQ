@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { computeCarbonFootprint, getCarbonLabel, getCarbonColor } from '@/utils/carbon';
+import { computeCarbonFootprint, getCarbonLabel, getCarbonHexColor } from '@/utils/carbon';
 import { generateEcoTips } from '@/services/gemini';
 import { formatCarbon, formatPercent } from '@/utils/format';
 import type { CarbonInputs } from '@/types';
+import { trackCarbonCalculated } from '@/services/analytics';
 
 const LEADERBOARD = [
   { section: 'Section 100', recycled: 42, composted: 18, landfill: 8, rate: 0.88 },
@@ -27,6 +28,7 @@ function EcoScore(): React.ReactElement {
     const footprint = computeCarbonFootprint(inputs);
     setResult(footprint);
     setCalculated(true);
+    trackCarbonCalculated(inputs.transportMode, inputs.mealType, footprint.totalKgCO2);
     setLoadingTips(true);
     const ecoTips = await generateEcoTips(inputs.transportMode, inputs.mealType, footprint.totalKgCO2);
     setTips(ecoTips);
@@ -80,7 +82,7 @@ function EcoScore(): React.ReactElement {
           {result && calculated && (
             <div className="card card-glow" style={{ marginTop: 16 }}>
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <div style={{ fontSize: '3rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: getCarbonColor(result.totalKgCO2).replace('text-', '#').replace('green-400', '4ade80').replace('yellow-400', 'fbbf24').replace('orange-400', 'fb923c').replace('red-400', 'f87171') }}>
+                <div style={{ fontSize: '3rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: getCarbonHexColor(result.totalKgCO2) }}>
                   {formatCarbon(result.totalKgCO2)}
                 </div>
                 <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>

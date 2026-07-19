@@ -150,6 +150,23 @@ export function getCarbonLabel(kgCO2: number): 'Minimal' | 'Low' | 'Moderate' | 
 }
 
 /**
+ * Returns a CSS hex color for a carbon level (used in EcoScore UI).
+ *
+ * @param kgCO2 - Total carbon in kg CO2e
+ * @returns CSS color string
+ *
+ * @example
+ * getCarbonHexColor(2.0) // => '#4ade80'
+ */
+export function getCarbonHexColor(kgCO2: number): string {
+  if (kgCO2 <= 0) return '#4ade80';   // green-400
+  if (kgCO2 <= 3) return '#4ade80';   // green-400
+  if (kgCO2 <= 8) return '#fbbf24';   // yellow-400
+  if (kgCO2 <= 15) return '#fb923c';  // orange-400
+  return '#f87171';                    // red-400
+}
+
+/**
  * Returns a color class for a carbon level (used in EcoScore UI).
  *
  * @param kgCO2 - Total carbon in kg CO2e

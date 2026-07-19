@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { createChatSession, sendChatMessage, buildChatMessage } from '@/services/gemini';
 import type { ChatMessage, GameDayContext } from '@/types';
 import type { ChatSession } from '@google/generative-ai';
+import { trackAiChatSent, trackAiChatResponseReceived } from '@/services/analytics';
 
 const SUGGESTED = [
   'Where is Gate B at MetLife Stadium?',
@@ -53,8 +54,10 @@ function AiAssist(): React.ReactElement {
     setInput('');
     setMessages((prev) => [...prev, buildChatMessage('user', msg)]);
     setLoading(true);
+    trackAiChatSent(msg.length);
     const { text: reply, isOffline: offline } = await sendChatMessage(sessionRef.current, msg);
     setIsOffline(offline);
+    trackAiChatResponseReceived(offline);
     setMessages((prev) => [...prev, { ...buildChatMessage('model', reply), isOfflineFallback: offline }]);
     setLoading(false);
     inputRef.current?.focus();

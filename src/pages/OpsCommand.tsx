@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { sanitizeAndTruncate } from '@/utils/sanitize';
+import { trackIncidentLogged, trackCommsMessageSent } from '@/services/analytics';
+import { useAuth } from '@/contexts/AuthContext';
 
 const INCIDENTS = [
   { id: 'i1', type: 'medical', location: 'Section 102, Row G', desc: 'Fan requires medical attention', severity: 'high', status: 'in-progress', time: '15:42' },
@@ -21,6 +23,7 @@ const STATUS_BADGE: Record<string, string> = { open: 'badge-amber', 'in-progress
 
 function OpsCommand(): React.ReactElement {
   const { t } = useTranslation();
+  useAuth();
   const [tab, setTab] = useState<'incidents' | 'resources' | 'comms'>('incidents');
   const [newIncident, setNewIncident] = useState({ type: 'medical', location: '', desc: '', severity: 'medium' });
   const [submitted, setSubmitted] = useState(false);
@@ -34,6 +37,7 @@ function OpsCommand(): React.ReactElement {
     e.preventDefault();
     const clean = { ...newIncident, location: sanitizeAndTruncate(newIncident.location, 100), desc: sanitizeAndTruncate(newIncident.desc, 500) };
     if (import.meta.env['VITE_IS_DEV'] === 'true') console.warn('New incident:', clean);
+    trackIncidentLogged(newIncident.severity, newIncident.type);
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 3000);
   };
@@ -41,6 +45,7 @@ function OpsCommand(): React.ReactElement {
   const handleSendMessage = (): void => {
     if (!message.trim()) return;
     setCommsLog((prev) => [...prev, { id: `c${Date.now().toString()}`, from: 'You', text: sanitizeAndTruncate(message, 300), time: new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) }]);
+    trackCommsMessageSent();
     setMessage('');
   };
 

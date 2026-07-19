@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { translateText } from '@/services/gemini';
+import { trackTranslationRequested } from '@/services/analytics';
 
 const PHRASES = [
   { category: 'Greetings', items: [
@@ -32,6 +33,7 @@ function LinguaAssist(): React.ReactElement {
   const handleTranslate = async (): Promise<void> => {
     if (!message.trim()) return;
     setTranslating(true);
+    trackTranslationRequested(LANG_NAMES[targetLang] ?? targetLang);
     const result = await translateText(message, LANG_NAMES[targetLang] ?? 'Spanish');
     setTranslated(result);
     setTranslating(false);

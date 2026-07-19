@@ -1,9 +1,44 @@
 import '@testing-library/jest-dom';
 import { vi, expect } from 'vitest';
 import * as matchers from 'vitest-axe/matchers';
+import enTranslations from '../i18n/locales/en.json';
 
 // Extend expect matcher for axe-core
 expect.extend(matchers);
+
+// Mock window.HTMLElement.prototype.scrollIntoView
+window.HTMLElement.prototype.scrollIntoView = vi.fn();
+
+// Mock react-i18next to return translations synchronously using en.json
+vi.mock('react-i18next', () => {
+  return {
+    useTranslation: () => ({
+      t: (key: string) => {
+        const parts = key.split('.');
+        let current: any = enTranslations;
+        for (const part of parts) {
+          if (current && typeof current === 'object' && part in current) {
+            current = current[part];
+          } else {
+            current = undefined;
+            break;
+          }
+        }
+        return typeof current === 'string' ? current : (key.split('.').pop() || key);
+      },
+      i18n: {
+        changeLanguage: () => Promise.resolve(),
+        language: 'en',
+        dir: () => 'ltr',
+      },
+    }),
+    I18nextProvider: ({ children }: { children: React.ReactNode }) => children,
+    initReactI18next: {
+      type: '3rdParty',
+      init: () => {},
+    },
+  };
+});
 
 // Mock window.SpeechRecognition and webkitSpeechRecognition
 const mockSpeechRecognition = vi.fn().mockImplementation(() => ({
@@ -24,16 +59,33 @@ Object.defineProperty(window, 'webkitSpeechRecognition', {
   value: mockSpeechRecognition,
 });
 
-// Mock environment variables
-vi.stubEnv('VITE_GEMINI_API_KEY', 'mock-api-key');
+// Mock environment variables — aligned with actual code (GROQ, not Gemini)
+vi.stubEnv('VITE_GROQ_API_KEY', 'mock-groq-api-key');
 vi.stubEnv('VITE_FIREBASE_API_KEY', 'mock-firebase-key');
 vi.stubEnv('VITE_FIREBASE_AUTH_DOMAIN', 'mock-auth-domain');
 vi.stubEnv('VITE_FIREBASE_PROJECT_ID', 'mock-project-id');
 vi.stubEnv('VITE_FIREBASE_STORAGE_BUCKET', 'mock-storage-bucket');
 vi.stubEnv('VITE_FIREBASE_MESSAGING_SENDER_ID', 'mock-sender-id');
 vi.stubEnv('VITE_FIREBASE_APP_ID', 'mock-app-id');
+vi.stubEnv('VITE_FIREBASE_MEASUREMENT_ID', 'mock-measurement-id');
 vi.stubEnv('VITE_MAPS_KEY', 'mock-maps-key');
 vi.stubEnv('VITE_IS_DEV', 'true');
+
+// Mock global fetch for Groq API calls
+global.fetch = vi.fn().mockResolvedValue({
+  ok: true,
+  json: () =>
+    Promise.resolve({
+      choices: [
+        {
+          message: {
+            content: 'Mock Groq response',
+          },
+        },
+      ],
+    }),
+  text: () => Promise.resolve('Mock Groq response'),
+} as unknown as Response);
 
 // Mock Firebase services
 vi.mock('firebase/app', () => ({
@@ -61,11 +113,21 @@ vi.mock('firebase/firestore', () => ({
   onSnapshot: vi.fn(() => () => {}),
 }));
 
-// Mock Google Generative AI
+vi.mock('firebase/analytics', () => ({
+  getAnalytics: vi.fn(() => ({})),
+  logEvent: vi.fn(),
+  isSupported: vi.fn(() => Promise.resolve(true)),
+}));
+
+vi.mock('firebase/performance', () => ({
+  getPerformance: vi.fn(() => ({})),
+}));
+
+// Mock Google Generative AI (kept for type compatibility even though Groq is used)
 vi.mock('@google/generative-ai', () => {
   const mockSendMessage = vi.fn().mockResolvedValue({
     response: {
-      text: () => 'Mock Gemini Response',
+      text: () => 'Mock Groq Response',
     },
   });
 

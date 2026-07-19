@@ -12,7 +12,7 @@ if (!rootElement) throw new Error('Root element not found. Check index.html has 
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <I18nextProvider i18n={i18n}>
         <AuthProvider>
           <App />

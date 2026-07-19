@@ -1,5 +1,5 @@
 /**
- * @fileoverview Firebase service initialization and Firestore helpers.
+ * @fileoverview Firebase service initialization — Auth, Firestore, Analytics, Performance.
  * All Firebase config is loaded from environment variables.
  * This module crashes fast with a clear error if any required env var is missing.
  */
@@ -13,6 +13,14 @@ import {
   getFirestore,
   type Firestore,
 } from 'firebase/firestore';
+import {
+  getAnalytics,
+  type Analytics,
+} from 'firebase/analytics';
+import {
+  getPerformance,
+  type FirebasePerformance,
+} from 'firebase/performance';
 
 // ── Environment variable validation ──────────────────────────────────────────
 
@@ -57,21 +65,44 @@ const firebaseConfig = {
   storageBucket: import.meta.env['VITE_FIREBASE_STORAGE_BUCKET'] as string,
   messagingSenderId: import.meta.env['VITE_FIREBASE_MESSAGING_SENDER_ID'] as string,
   appId: import.meta.env['VITE_FIREBASE_APP_ID'] as string,
-  ...(import.meta.env['VITE_FIREBASE_MEASUREMENT_ID'] ? { measurementId: import.meta.env['VITE_FIREBASE_MEASUREMENT_ID'] as string } : {}),
+  ...(import.meta.env['VITE_FIREBASE_MEASUREMENT_ID']
+    ? { measurementId: import.meta.env['VITE_FIREBASE_MEASUREMENT_ID'] as string }
+    : {}),
 };
 
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
+let analytics: Analytics | null = null;
+let perf: FirebasePerformance | null = null;
 
 try {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
+
+  // Firebase Analytics — requires measurementId; initialize lazily to avoid SSR issues
+  if (import.meta.env['VITE_FIREBASE_MEASUREMENT_ID'] && typeof window !== 'undefined') {
+    try {
+      analytics = getAnalytics(app);
+    } catch {
+      // Analytics may be unavailable in certain environments (e.g. ad-blockers, testing)
+      analytics = null;
+    }
+  }
+
+  // Firebase Performance Monitoring — browser only
+  if (typeof window !== 'undefined') {
+    try {
+      perf = getPerformance(app);
+    } catch {
+      perf = null;
+    }
+  }
 } catch (error) {
   throw new Error(
     `StadiumIQ: Failed to initialize Firebase. Check your credentials.\n${String(error)}`
   );
 }
 
-export { app, auth, db };
+export { app, auth, db, analytics, perf };

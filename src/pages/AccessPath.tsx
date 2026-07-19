@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { sanitizeAndTruncate } from '@/utils/sanitize';
+import { trackAssistanceRequested } from '@/services/analytics';
 
 const ROUTES = [
   { id: 'r1', from: 'Gate A', to: 'Section 100 (Wheelchair)', steps: ['Enter Gate A — accessible entrance on the right', 'Take the dedicated elevator to Level 1', 'Follow blue accessibility signs to Section 100'], mins: 6, elevator: true, status: 'operational' as const },
@@ -40,6 +41,7 @@ function AccessPath(): React.ReactElement {
     if (import.meta.env['VITE_IS_DEV'] === 'true') {
       console.warn('Assistance request:', { location: sanitizeAndTruncate(location, 100), needType, notes: clean });
     }
+    trackAssistanceRequested(needType);
     setSubmitted(true);
     setLocation(''); setNotes('');
     setTimeout(() => setSubmitted(false), 5000);

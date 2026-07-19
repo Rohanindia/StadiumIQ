@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { generatePAAnnouncement } from '@/services/gemini';
 import type { AlertLevel } from '@/types';
 import { formatPercent } from '@/utils/format';
+import { trackPAGenerated } from '@/services/analytics';
 
 const ZONES = [
   { id: 'z1', name: 'Gate A Concourse', capacity: 2000, current: 1820, alert: 'red' as AlertLevel },
@@ -30,6 +31,7 @@ function CrowdIQ(): React.ReactElement {
     const zone = ZONES.find((z) => z.id === selectedZone);
     if (!zone) return;
     setGenerating(true);
+    trackPAGenerated(zone.name);
     const msg = await generatePAAnnouncement(zone.name, zone.alert === 'green' ? 'amber' : zone.alert, `${formatPercent(zone.current / zone.capacity)} occupancy`);
     setAnnouncement(msg);
     setGenerating(false);

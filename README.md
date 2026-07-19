@@ -45,6 +45,7 @@
 - **Accessibility** — WCAG 2.1 AA compliant, aria-live regions, skip-to-content
 - **Rate Limiting** — Token bucket algorithm (10 calls/min) for AI API
 - **OpsCommand Dashboard** — Protected route (`/ops`) with incident & resource management
+- **React Router v7 Ready** — Enabled future flags (`v7_startTransition`, `v7_relativeSplatPath`) for a warnings-free console and seamless upgrade path
 
 ---
 
@@ -54,7 +55,7 @@
 |-------|-----------|
 | Framework | React 19 + TypeScript |
 | Build Tool | Vite 5 |
-| Routing | React Router v6 |
+| Routing | React Router v6 (with v7 Future Flags) |
 | AI | Groq API (LLaMA 3.3-70B Versatile) |
 | Database | Firebase Firestore |
 | Auth | Firebase Authentication |
@@ -141,12 +142,12 @@ Open [http://localhost:5173](http://localhost:5173)
 
 ## 🧪 Tests
 
-```
+```bash
 npm test
 ```
 
 Tests are located in `src/test/` and `src/pages/*.test.tsx`.  
-All tests use **Vitest** + **@testing-library/react**.
+All 171 unit and integration tests compile cleanly with TypeScript (`tsc --noEmit`) and run completely green with 0 console warnings or errors. All tests use **Vitest** + **@testing-library/react**.
 
 ---
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { trackSeatSearched } from '@/services/analytics';
 
 const SECTIONS = [
   { id: '100', gate: 'Gate A', capacity: 450, occupied: 390 },
@@ -30,9 +31,11 @@ function FanHub(): React.ReactElement {
   const findSeat = (): void => {
     const sec = SECTIONS.find((s) => s.id === section);
     if (!sec) {
+      trackSeatSearched(section, false);
       setResult({ gate: 'Unknown', steps: ['Section not found. Please check your ticket and try again.'] });
       return;
     }
+    trackSeatSearched(section, true);
     setResult({
       gate: sec.gate,
       steps: [

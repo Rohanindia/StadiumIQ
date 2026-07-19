@@ -87,3 +87,31 @@ export function isPotentiallyMalicious(input: string): boolean {
   const sanitized = DOMPurify.sanitize(input, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
   return sanitized !== input;
 }
+
+/**
+ * Simple prompt injection guard.
+ * Detects patterns commonly used to override system prompts and replaces them with a safety placeholder.
+ */
+export function cleanPromptInjection(input: string): string {
+  if (typeof input !== 'string') return '';
+  
+  const injectionPatterns = [
+    /ignore\s+(?:all\s+)?(?:previous\s+)?instructions/gi,
+    /system\s+override/gi,
+    /override\s+(?:system\s+)?prompt/gi,
+    /you\s+are\s+no\s+longer/gi,
+    /instead\s+of\s+(?:the\s+)?previous/gi,
+    /new\s+instructions/gi,
+    /act\s+as\s+a\s+developer/gi,
+    /bypass\s+restrictions/gi,
+    /developer\s+mode/gi,
+    /forget\s+(?:everything|what\s+i\s+said|your\s+instructions)/gi,
+  ];
+
+  let cleaned = input;
+  for (const pattern of injectionPatterns) {
+    cleaned = cleaned.replace(pattern, '[Content Removed for Prompt Safety]');
+  }
+  return cleaned;
+}
+

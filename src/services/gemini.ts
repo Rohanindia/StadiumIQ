@@ -1,6 +1,7 @@
 import type { ChatSession } from '@google/generative-ai';
 import { createTokenBucket, consumeToken } from '@/utils/rateLimit';
 import type { ChatMessage, GameDayContext, CrowdPrediction } from '@/types';
+import { cleanPromptInjection } from '@/utils/sanitize';
 
 const IS_DEV = import.meta.env['VITE_IS_DEV'] === 'true';
 
@@ -70,6 +71,41 @@ async function callGroqAPI(
   messages: { role: string; content: string }[],
   jsonOutput = false
 ): Promise<string> {
+  const cleanedMessages = messages.map(msg => ({
+    ...msg,
+    content: msg.role === 'user' ? cleanPromptInjection(msg.content) : msg.content
+  }));
+
+  const projectId = import.meta.env['VITE_FIREBASE_PROJECT_ID'] as string | undefined;
+
+  // 1. Attempt secure backend proxy call first
+  if (projectId) {
+    const functionUrl = `https://us-central1-${projectId}.cloudfunctions.net/groqProxy`;
+    try {
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: cleanedMessages,
+          jsonOutput,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (content) {
+          return content as string;
+        }
+      }
+    } catch {
+      // Fail silently and proceed to local client fallback
+    }
+  }
+
+  // 2. Client-side fallback if Cloud Function is not available
   const apiKey = import.meta.env['VITE_GROQ_API_KEY'] as string | undefined;
   if (!apiKey) {
     throw new Error('Groq API Key not configured');
@@ -83,7 +119,7 @@ async function callGroqAPI(
     },
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
-      messages,
+      messages: cleanedMessages,
       temperature: jsonOutput ? 0.2 : 0.7,
       max_tokens: jsonOutput ? 512 : 1024,
       ...(jsonOutput ? { response_format: { type: 'json_object' } } : {}),
